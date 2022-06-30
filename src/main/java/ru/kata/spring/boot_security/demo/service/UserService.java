@@ -50,13 +50,14 @@ public class UserService implements UserDetailsService {
 
     @Override
     @Transactional
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
+        mapRolesToAuthorities(user.getRoles());
+
         if (user == null) {
-            throw new UsernameNotFoundException(String.format("Пользователя с именем '%s' не найдено", username));
+            throw new UsernameNotFoundException(String.format("Пользователя с именем '%s' не найдено", user.getUsername()));
         }
-        return new org.springframework.security.core.User(user.getUsername(),
-                user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+        return user;
     }
 
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
